@@ -69,11 +69,6 @@ namespace SimplSockets
         /// <param name="useNagleAlgorithm">Whether or not to use the Nagle algorithm.</param>
         public SimplSocketClient(Func<Socket> socketFunc, int messageBufferSize = 65536, int communicationTimeout = 10000, int maxMessageSize = 10 * 1024 * 1024, bool useNagleAlgorithm = false)
         {
-            // Sanitize
-            if (socketFunc == null)
-            {
-                throw new ArgumentNullException("socketFunc");
-            }
             if (messageBufferSize < 512)
             {
                 throw new ArgumentException("must be >= 512", "messageBufferSize");
@@ -87,7 +82,7 @@ namespace SimplSockets
                 throw new ArgumentException("must be >= 1024", "maxMessageSize");
             }
 
-            _socketFunc = socketFunc;
+            _socketFunc = socketFunc ?? throw new ArgumentNullException("socketFunc");
             _messageBufferSize = messageBufferSize;
             _communicationTimeout = communicationTimeout;
             _maxMessageSize = maxMessageSize;
@@ -100,7 +95,7 @@ namespace SimplSockets
             _clientMultiplexer = new Dictionary<int, MultiplexerData>(PREDICTED_THREAD_COUNT);
 
             // Create the pools
-            _multiplexerDataPool = new Pool<MultiplexerData>(PREDICTED_THREAD_COUNT, () => new MultiplexerData { ManualResetEvent = new ManualResetEvent(false) }, multiplexerData => 
+            _multiplexerDataPool = new Pool<MultiplexerData>(PREDICTED_THREAD_COUNT, () => new MultiplexerData { ManualResetEvent = new ManualResetEvent(false) }, multiplexerData =>
             {
                 multiplexerData.Message = null;
                 multiplexerData.ManualResetEvent.Reset();
@@ -130,8 +125,8 @@ namespace SimplSockets
                 receivedMessage.Message = null;
                 receivedMessage.Socket = null;
             });
-            _messageReceivedArgsPool = new Pool<MessageReceivedArgs>(PREDICTED_THREAD_COUNT, () => new MessageReceivedArgs(), messageReceivedArgs => { messageReceivedArgs.ReceivedMessage = null; });
-            _socketErrorArgsPool = new Pool<SocketErrorArgs>(PREDICTED_THREAD_COUNT, () => new SocketErrorArgs(), socketErrorArgs => { socketErrorArgs.Exception = null; });
+            _messageReceivedArgsPool = new Pool<MessageReceivedArgs>(PREDICTED_THREAD_COUNT, () => new MessageReceivedArgs(), messageReceivedArgs => messageReceivedArgs.ReceivedMessage = null);
+            _socketErrorArgsPool = new Pool<SocketErrorArgs>(PREDICTED_THREAD_COUNT, () => new SocketErrorArgs(), socketErrorArgs => socketErrorArgs.Exception = null);
         }
 
         /// <summary>
@@ -177,7 +172,7 @@ namespace SimplSockets
                 {
                     return false;
                 }
-                
+
                 // Spin up the keep-alive
                 Task.Factory.StartNew(() => KeepAlive(_socket));
 
@@ -509,7 +504,7 @@ namespace SimplSockets
                             // Reset message state
                             resultBuffer = null;
                         }
-                        
+
                         bytesToRead = -1;
                         threadId = -1;
 
@@ -642,7 +637,7 @@ namespace SimplSockets
         private MultiplexerData GetMultiplexerData(int threadId)
         {
             MultiplexerData multiplexerData = null;
-            
+
             _clientMultiplexerLock.EnterReadLock();
             try
             {

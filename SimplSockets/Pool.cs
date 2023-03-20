@@ -33,7 +33,7 @@ namespace SimplSockets
             for (int i = 0; i < poolCount; i++)
             {
                 var item = _newItemMethod();
-                if (_resetItemMethod != null) _resetItemMethod(item);
+                _resetItemMethod?.Invoke(item);
                 _queue.Add(item);
             }
         }
@@ -49,14 +49,11 @@ namespace SimplSockets
             {
                 // Dispose if applicable
                 var disposable = item as IDisposable;
-                if (disposable != null) disposable.Dispose();
+                disposable?.Dispose();
                 return;
             }
 
-            if (_resetItemMethod != null)
-            {
-                _resetItemMethod(item);
-            }
+            _resetItemMethod?.Invoke(item);
 
             lock (_queue)
             {
@@ -64,7 +61,7 @@ namespace SimplSockets
                 {
                     // Dispose if applicable
                     var disposable = item as IDisposable;
-                    if (disposable != null) disposable.Dispose();
+                    disposable?.Dispose();
                     return;
                 }
 

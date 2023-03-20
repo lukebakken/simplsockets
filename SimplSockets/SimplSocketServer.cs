@@ -61,11 +61,6 @@ namespace SimplSockets
         /// <param name="useNagleAlgorithm">Whether or not to use the Nagle algorithm.</param>
         public SimplSocketServer(Func<Socket> socketFunc, int messageBufferSize = 65536, int communicationTimeout = 10000, int maxMessageSize = 10 * 1024 * 1024, bool useNagleAlgorithm = false)
         {
-            // Sanitize
-            if (socketFunc == null)
-            {
-                throw new ArgumentNullException("socketFunc");
-            }
             if (messageBufferSize < 512)
             {
                 throw new ArgumentException("must be >= 512", "messageBufferSize");
@@ -79,7 +74,7 @@ namespace SimplSockets
                 throw new ArgumentException("must be >= 1024", "maxMessageSize");
             }
 
-            _socketFunc = socketFunc;
+            _socketFunc = socketFunc ?? throw new ArgumentNullException("socketFunc");
             _messageBufferSize = messageBufferSize;
             _communicationTimeout = communicationTimeout;
             _maxMessageSize = maxMessageSize;
@@ -114,8 +109,8 @@ namespace SimplSockets
                 receivedMessage.Message = null;
                 receivedMessage.Socket = null;
             });
-            _messageReceivedArgsPool = new Pool<MessageReceivedArgs>(PREDICTED_CONNECTION_COUNT, () => new MessageReceivedArgs(), messageReceivedArgs => { messageReceivedArgs.ReceivedMessage = null; });
-            _socketErrorArgsPool = new Pool<SocketErrorArgs>(PREDICTED_CONNECTION_COUNT, () => new SocketErrorArgs(), socketErrorArgs => { socketErrorArgs.Exception = null; });
+            _messageReceivedArgsPool = new Pool<MessageReceivedArgs>(PREDICTED_CONNECTION_COUNT, () => new MessageReceivedArgs(), messageReceivedArgs => messageReceivedArgs.ReceivedMessage = null);
+            _socketErrorArgsPool = new Pool<SocketErrorArgs>(PREDICTED_CONNECTION_COUNT, () => new SocketErrorArgs(), socketErrorArgs => socketErrorArgs.Exception = null);
         }
 
         /// <summary>
@@ -289,13 +284,7 @@ namespace SimplSockets
         /// <summary>
         /// Gets the currently connected client count.
         /// </summary>
-        public int CurrentlyConnectedClientCount
-        {
-            get
-            {
-                return _currentlyConnectedClients.Count;
-            }
-        }
+        public int CurrentlyConnectedClientCount => _currentlyConnectedClients.Count;
 
         /// <summary>
         /// An event that is fired when a client successfully connects to the server. Hook into this to do something when a connection succeeds.
@@ -443,12 +432,7 @@ namespace SimplSockets
             }
 
             // Fire the event if needed
-            var clientConnected = ClientConnected;
-            if (clientConnected != null)
-            {
-                // Fire the event 
-                clientConnected(this, EventArgs.Empty);
-            }
+            ClientConnected?.Invoke(this, EventArgs.Empty);
 
             // Create receive buffer queue for this client
             _currentlyConnectedClientsReceiveQueuesLock.EnterWriteLock();
@@ -652,7 +636,7 @@ namespace SimplSockets
                         {
                             // Done, add to complete received messages
                             CompleteMessage(handler, threadId, resultBuffer);
-                            
+
                             // Reset message state
                             resultBuffer = null;
                         }
@@ -809,9 +793,7 @@ namespace SimplSockets
         {
             public ConnectedClient(Socket socket)
             {
-                if (socket == null) throw new ArgumentNullException("socket");
-
-                Socket = socket;
+                Socket = socket ?? throw new ArgumentNullException("socket");
                 LastResponse = DateTime.UtcNow;
             }
 

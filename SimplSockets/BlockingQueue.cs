@@ -14,7 +14,7 @@ namespace SimplSockets
         // The underlying queue
         private readonly List<T> _queue = new List<T>();
         // The semaphore used for blocking
-        private readonly Semaphore _semaphore = new Semaphore(0, Int32.MaxValue);
+        private readonly Semaphore _semaphore = new Semaphore(0, int.MaxValue);
 
         /// <summary>
         /// Enqueues an item.
