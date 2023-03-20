@@ -152,7 +152,10 @@ namespace DemoClient
 
         static async ValueTask WriteLineAsync(char prefix, IMemoryOwner<byte> encoded)
         {
-            using (encoded) { await WriteLineAsync(prefix, encoded.Memory); }
+            using (encoded)
+            {
+                await WriteLineAsync(prefix, encoded.Memory);
+            }
         }
 
         static async ValueTask WriteLineAsync(char prefix, ReadOnlyMemory<byte> encoded)
@@ -164,7 +167,7 @@ namespace DemoClient
 #if NET
                 await Console.Out.WriteLineAsync(leased.Memory);
 #else
-                await Console.Out.WriteLineAsync("TODO LRB");
+                await Console.Out.WriteLineAsync(leased.Memory.ToArray());
 #endif
             }
         }
