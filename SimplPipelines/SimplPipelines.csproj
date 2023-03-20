@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <VersionPrefix>0.1</VersionPrefix>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -7,15 +6,13 @@
     <AssemblyOriginatorKeyFile>SimplPipelines.snk</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
     <LangVersion>7.2</LangVersion>
-    
     <PackageId>SimplPipelines</PackageId>
-    <ProductName>SimplSockets</ProductName>
+    <ProductName>SimplPipelines</ProductName>
     <Authors>ironyx;marc.gravell</Authors>
     <PackageProjectUrl>https://github.com/haneytron/simplsockets</PackageProjectUrl>
     <PackageLicenseUrl>https://raw.githubusercontent.com/haneytron/simplsockets/master/LICENSE.txt</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/haneytron/simplsockets</RepositoryUrl>
-    
     <DebugSymbols>true</DebugSymbols>
     <DebugType>embedded</DebugType>
     <DefaultLanguage>en-US</DefaultLanguage>
@@ -38,5 +35,4 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-
 </Project>
