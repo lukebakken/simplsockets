@@ -11,9 +11,9 @@ using SimplSockets;
 
 namespace Benchmark
 {
-    static class Program
+    internal static class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             var summary = BenchmarkRunner.Run<Benchmarks>();
             Console.WriteLine(summary);
@@ -25,12 +25,11 @@ namespace Benchmark
     [SimpleJob(runtimeMoniker: RuntimeMoniker.Net60), SimpleJob(runtimeMoniker: RuntimeMoniker.Net472), MemoryDiagnoser, WarmupCount(2), IterationCount(10)]
     public class Benchmarks
     {
-        static readonly EndPoint
+        private static readonly EndPoint
             s1 = new IPEndPoint(IPAddress.Loopback, 6000),
             s2 = new IPEndPoint(IPAddress.Loopback, 6001);
-
-        byte[] _data;
-        IDisposable _socketServer, _pipeServer;
+        private byte[] _data;
+        private IDisposable _socketServer, _pipeServer;
         [GlobalSetup]
         public void Setup()
         {
@@ -43,11 +42,12 @@ namespace Benchmark
 
             _data = new byte[1024];
         }
-        static readonly Func<Socket> CreateSocket = () => new Socket(
+
+        private static readonly Func<Socket> CreateSocket = () => new Socket(
             AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
         { NoDelay = true };
 
-        static void Dispose<T>(ref T field) where T : class, IDisposable
+        private static void Dispose<T>(ref T field) where T : class, IDisposable
         {
             if (field != null) try { field.Dispose(); } catch { }
         }
@@ -62,14 +62,15 @@ namespace Benchmark
             CheckForLeaks();
         }
 
-        static void CheckForLeaks()
+        private static void CheckForLeaks()
         {
             int leaks = MemoryOwner.LeakCount<byte>();
             if (leaks != 0) throw new InvalidOperationException($"Failed to dispose {leaks} byte-leases");
         }
 
-        const int Ops = 1000;
-        long AssertResult(long result)
+        private const int Ops = 1000;
+
+        private long AssertResult(long result)
         {
             int expected = _data.Length * Ops;
             if (result != expected) throw new InvalidOperationException(
