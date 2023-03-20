@@ -1,19 +1,19 @@
-﻿using Pipelines.Sockets.Unofficial;
-using SimplPipelines;
-using SimplSockets;
-using System;
+﻿using System;
 using System.Buffers;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Pipelines.Sockets.Unofficial;
+using SimplPipelines;
+using SimplSockets;
 
 namespace DemoServer
 {
-    class Program
+    internal class Program
     {
-        static Task Main(string[] args)
+        private static Task Main(string[] args)
         {
             string option;
             TryAgain:
@@ -36,7 +36,8 @@ namespace DemoServer
                     
             }
         }
-        static async Task RunViaPipelines()
+
+        private static async Task RunViaPipelines()
         {
             using (var socket = SimplPipelineSocketServer.For<ReverseServer>())
             {
@@ -61,7 +62,8 @@ namespace DemoServer
                 }
             }
         }
-        static async Task RunViaSockets()
+
+        private static async Task RunViaSockets()
         {
             using (var server = new SimplSocketServer(
                 () => new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
@@ -85,7 +87,7 @@ namespace DemoServer
 
                     var blob = Encoding.UTF8.GetBytes(line);
                     server.Broadcast(blob);
-                    
+
                     await Console.Out.WriteLineAsync(
                         $"Broadcast {blob.Length} bytes to {server.CurrentlyConnectedClientCount} clients");
                 }
