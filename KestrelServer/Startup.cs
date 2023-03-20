@@ -11,7 +11,7 @@ namespace KestrelServer
 {
     public class Startup : IDisposable
     {
-        SimplPipelineServer _server = new ReverseServer();
+        private readonly SimplPipelineServer _server = new ReverseServer();
 
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940

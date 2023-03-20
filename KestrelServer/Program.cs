@@ -24,10 +24,7 @@ namespace KestrelServer
                     options.ListenLocalhost(5001);
 
                     // TCP 5000 for the service
-                    options.ListenLocalhost(5000, builder =>
-                    {
-                        builder.UseConnectionHandler<SimplConnectionHandler>();
-                    });
+                    options.ListenLocalhost(5000, builder => builder.UseConnectionHandler<SimplConnectionHandler>());
                 }).UseStartup<Startup>();
     }
 }
