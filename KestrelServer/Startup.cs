@@ -1,10 +1,11 @@
-﻿using DemoServer;
+﻿using System;
+using DemoServer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using SimplPipelines;
-using System;
 
 namespace KestrelServer
 {
@@ -20,9 +21,12 @@ namespace KestrelServer
         public void Dispose() => _server.Dispose();
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime lifetime)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime lifetime)
         {
-            if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
             app.Run(context => context.Response.WriteAsync($"clients: {_server.ClientCount}"));
         }
     }

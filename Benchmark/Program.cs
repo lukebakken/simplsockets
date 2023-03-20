@@ -1,12 +1,13 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading.Tasks;
+using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using DemoServer;
 using SimplPipelines;
 using SimplSockets;
-using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace Benchmark
 {
@@ -18,9 +19,10 @@ namespace Benchmark
             Console.WriteLine(summary);
         }
     }
+
     // note: MemoryDiagnoser here won't work well on CoreJob, due to
     // the GC not making total memory usage available
-    [ClrJob, CoreJob, MemoryDiagnoser, WarmupCount(2), IterationCount(10)]
+    [SimpleJob(runtimeMoniker: RuntimeMoniker.Net60), SimpleJob(runtimeMoniker: RuntimeMoniker.Net472), MemoryDiagnoser, WarmupCount(2), IterationCount(10)]
     public class Benchmarks
     {
         static readonly EndPoint
@@ -43,7 +45,7 @@ namespace Benchmark
         }
         static readonly Func<Socket> CreateSocket = () => new Socket(
             AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
-            { NoDelay = true };
+        { NoDelay = true };
         void Dispose<T>(ref T field) where T : class, IDisposable
         {
             if (field != null) try { field.Dispose(); } catch { }
@@ -64,7 +66,7 @@ namespace Benchmark
             int leaks = MemoryOwner.LeakCount<byte>();
             if (leaks != 0) throw new InvalidOperationException($"Failed to dispose {leaks} byte-leases");
         }
-        
+
         const int Ops = 1000;
         long AssertResult(long result)
         {
@@ -74,7 +76,7 @@ namespace Benchmark
             CheckForLeaks();
             return result;
         }
-        
+
         //[Benchmark(OperationsPerInvoke = Ops)]
         public long c1_s1()
         {

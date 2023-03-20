@@ -1,12 +1,12 @@
-﻿using SimplPipelines;
-using SimplSockets;
-using System;
+﻿using System;
 using System.Buffers;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using SimplPipelines;
+using SimplSockets;
 
 namespace DemoClient
 {
@@ -15,7 +15,7 @@ namespace DemoClient
         static Task Main(string[] args)
         {
             string option;
-            TryAgain:
+        TryAgain:
             if (args == null || args.Length == 0)
             {
                 Console.WriteLine("1: run client via SimplPipelines");
@@ -149,17 +149,23 @@ namespace DemoClient
                 }
             }
         }
+
         static async ValueTask WriteLineAsync(char prefix, IMemoryOwner<byte> encoded)
         {
             using (encoded) { await WriteLineAsync(prefix, encoded.Memory); }
         }
+
         static async ValueTask WriteLineAsync(char prefix, ReadOnlyMemory<byte> encoded)
         {
-            using (var leased = encoded.Decode())
+            using (var leased = encoded.Decode(encoding: Encoding.UTF8))
             {
                 await Console.Out.WriteAsync(prefix);
                 await Console.Out.WriteAsync(' ');
+#if NET
                 await Console.Out.WriteLineAsync(leased.Memory);
+#else
+                await Console.Out.WriteLineAsync("TODO LRB");
+#endif
             }
         }
     }

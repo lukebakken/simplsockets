@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Connections;
-using Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv.Internal.Networking;
-using SimplPipelines;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Connections;
+using SimplPipelines;
 
 namespace KestrelServer
 {
@@ -16,7 +15,9 @@ namespace KestrelServer
             {
                 await _server.RunClientAsync(connection.Transport);
             }
-            catch (IOException io) when (io.InnerException is UvException uv && uv.StatusCode == -4077)
+            // TODO LRB
+            // catch (IOException io) when (io.InnerException is UvException uv && uv.StatusCode == -4077)
+            catch (IOException)
             { } //swallow libuv disconnect
         }
     }
