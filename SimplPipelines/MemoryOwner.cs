@@ -69,7 +69,7 @@ namespace SimplPipelines
         {
             public static IMemoryOwner<T> Empty { get; } = new SimpleMemoryOwner<T>(Array.Empty<T>());
             public SimpleMemoryOwner(Memory<T> memory) => Memory = memory;
-            
+
             public Memory<T> Memory { get; }
             public void Dispose() { }
         }
@@ -108,5 +108,5 @@ namespace SimplPipelines
             internal static int LeakCount() => Thread.VolatileRead(ref _leakCount);
         }
     }
-    
+
 }

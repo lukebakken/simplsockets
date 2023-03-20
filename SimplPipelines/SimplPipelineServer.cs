@@ -10,7 +10,8 @@ namespace SimplPipelines
     public abstract class SimplPipelineServer : IDisposable
     {
         public int ClientCount => _clients.Count;
-        readonly ConcurrentDictionary<Client, Client> _clients = new ConcurrentDictionary<Client, Client>();
+
+        private readonly ConcurrentDictionary<Client, Client> _clients = new ConcurrentDictionary<Client, Client>();
         public Task RunClientAsync(IDuplexPipe pipe, CancellationToken cancellationToken = default)
             => new Client(pipe, this).RunAsync(cancellationToken);
         protected virtual ValueTask OnReceiveAsync(IMemoryOwner<byte> message) => default;
@@ -120,11 +121,11 @@ namespace SimplPipelines
             }
         }
 
-        bool _disposed;
+        private bool _disposed;
         public void Dispose()
         {
             _disposed = true;
-            foreach(var client in _clients)
+            foreach (var client in _clients)
             {
                 client.Key.Dispose();
             }

@@ -1,10 +1,10 @@
-﻿using Pipelines.Sockets.Unofficial;
-using System;
+﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO.Pipelines;
 using System.Net;
 using System.Threading.Tasks;
+using Pipelines.Sockets.Unofficial;
 
 namespace SimplPipelines
 {
@@ -71,7 +71,7 @@ namespace SimplPipelines
                         messageId = 0; // treat as MessageReceived
                     }
                 }
-                if(tcs != null)
+                if (tcs != null)
                 {
                     IMemoryOwner<byte> lease = null;
                     try
@@ -82,13 +82,14 @@ namespace SimplPipelines
                         lease = payload.Lease();
                         if (tcs.TrySetResult(lease))
                             lease = null;
-                    } finally
+                    }
+                    finally
                     {
-                        if(lease != null)
+                        if (lease != null)
                             try { lease.Dispose(); } catch { }
-                    }                    
+                    }
                 }
-                
+
             }
             if (messageId == 0)
             {

@@ -34,7 +34,7 @@ namespace SimplPipelines
             try { _singleWriter.Dispose(); } catch { }
         }
 
-        void WriteHeader(PipeWriter writer, int length, int messageId)
+        private void WriteHeader(PipeWriter writer, int length, int messageId)
         {
             // write the control bytes placeholder; the first 4 bytes are little
             // endian message length, the last 4 are message id (was: thread id)
@@ -93,7 +93,8 @@ namespace SimplPipelines
                 if (release) _singleWriter.Release();
             }
         }
-        async ValueTask WriteAsyncSlowPath(ReadOnlyMemory<byte> payload, int messageId)
+
+        private async ValueTask WriteAsyncSlowPath(ReadOnlyMemory<byte> payload, int messageId)
         {
             await _singleWriter.WaitAsync();
             try
@@ -110,7 +111,7 @@ namespace SimplPipelines
 
         protected abstract ValueTask OnReceiveAsync(ReadOnlySequence<byte> payload, int messageId);
 
-        static int ParseFrameHeader(ReadOnlySpan<byte> input, out int messageId)
+        private static int ParseFrameHeader(ReadOnlySpan<byte> input, out int messageId)
         {
             var length = BinaryPrimitives.ReadInt32LittleEndian(input);
             messageId = BinaryPrimitives.ReadInt32LittleEndian(input.Slice(4));
