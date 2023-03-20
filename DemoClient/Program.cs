@@ -10,12 +10,12 @@ using SimplSockets;
 
 namespace DemoClient
 {
-    class Program
+    internal class Program
     {
-        static Task Main(string[] args)
+        private static Task Main(string[] args)
         {
             string option;
-        TryAgain:
+TryAgain:
             if (args == null || args.Length == 0)
             {
                 Console.WriteLine("1: run client via SimplPipelines");
@@ -58,8 +58,10 @@ namespace DemoClient
                 await BenchmarkClient(work);
             }
         }
-        static readonly byte[] gibberish = new byte[512];
-        static async ValueTask BenchmarkClient(WorkUnit workUnit, int iterations = 10, int countPerIteration = 100)
+
+        private static readonly byte[] gibberish = new byte[512];
+
+        private static async ValueTask BenchmarkClient(WorkUnit workUnit, int iterations = 10, int countPerIteration = 100)
         {
             for (int i = 0; i < 10; i++)
             {
@@ -69,11 +71,13 @@ namespace DemoClient
                 Console.WriteLine($"{countPerIteration}x{gibberish.Length}: {watch.ElapsedMilliseconds}ms");
             }
         }
-        abstract class WorkUnit
+
+        private abstract class WorkUnit
         {
             public abstract ValueTask Execute(byte[] payload, int count);
         }
-        class SocketsWorkUnit : WorkUnit
+
+        private class SocketsWorkUnit : WorkUnit
         {
             public SimplSocketClient Client { get; }
             public SocketsWorkUnit(SimplSocketClient client)
@@ -85,7 +89,8 @@ namespace DemoClient
                 return default;
             }
         }
-        class PipelinesWorkUnit : WorkUnit
+
+        private class PipelinesWorkUnit : WorkUnit
         {
             public SimplPipelineClient Client { get; }
             public PipelinesWorkUnit(SimplPipelineClient client)
@@ -97,7 +102,7 @@ namespace DemoClient
             }
         }
 
-        static async Task RunViaPipelines()
+        private static async Task RunViaPipelines()
         {
             using (var client = await SimplPipelineClient.ConnectAsync(
                 new IPEndPoint(IPAddress.Loopback, 5000)))
@@ -125,7 +130,7 @@ namespace DemoClient
             }
         }
 
-        static async Task RunViaSockets()
+        private static async Task RunViaSockets()
         {
             using (var client = new SimplSocketClient(() => new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
             { NoDelay = true }))
@@ -150,7 +155,7 @@ namespace DemoClient
             }
         }
 
-        static async ValueTask WriteLineAsync(char prefix, IMemoryOwner<byte> encoded)
+        private static async ValueTask WriteLineAsync(char prefix, IMemoryOwner<byte> encoded)
         {
             using (encoded)
             {
@@ -158,7 +163,7 @@ namespace DemoClient
             }
         }
 
-        static async ValueTask WriteLineAsync(char prefix, ReadOnlyMemory<byte> encoded)
+        private static async ValueTask WriteLineAsync(char prefix, ReadOnlyMemory<byte> encoded)
         {
             using (var leased = encoded.Decode(encoding: Encoding.UTF8))
             {
