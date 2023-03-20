@@ -46,15 +46,16 @@ namespace Benchmark
         static readonly Func<Socket> CreateSocket = () => new Socket(
             AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
         { NoDelay = true };
-        void Dispose<T>(ref T field) where T : class, IDisposable
+
+        static void Dispose<T>(ref T field) where T : class, IDisposable
         {
             if (field != null) try { field.Dispose(); } catch { }
         }
         [GlobalCleanup]
         public void TearDown()
         {
-            Dispose(ref _socketServer);
-            Dispose(ref _pipeServer);
+            Benchmarks.Dispose(ref _socketServer);
+            Benchmarks.Dispose(ref _pipeServer);
 
             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
             GC.WaitForPendingFinalizers();
