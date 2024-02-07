@@ -1,19 +1,23 @@
-﻿using System;
+﻿using SimplPipelines;
+using SimplSockets;
+using System;
 using System.Buffers;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using SimplPipelines;
-using SimplSockets;
 
 namespace DemoClient
 {
     internal class Program
     {
+        private const ushort port = 55000;
+
         private static Task Main(string[] args)
         {
+            return RunViaPipelines();
+            /*
             string option;
 TryAgain:
             if (args == null || args.Length == 0)
@@ -38,12 +42,14 @@ TryAgain:
                 default: goto TryAgain;
 
             }
+            */
         }
 
         private static async Task RunBenchmarkViaSockets()
         {
             using (var client = new SimplSocketClient(() => new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)))
             {
+                client.Connect(new IPEndPoint(IPAddress.Loopback, port));
                 var work = new SocketsWorkUnit(client);
                 await BenchmarkClient(work);
             }
@@ -52,7 +58,7 @@ TryAgain:
         private static async Task RunBenchmarkViaPipelines()
         {
             using (var client = await SimplPipelineClient.ConnectAsync(
-    new IPEndPoint(IPAddress.Loopback, 5000)))
+    new IPEndPoint(IPAddress.Loopback, port)))
             {
                 var work = new PipelinesWorkUnit(client);
                 await BenchmarkClient(work);
@@ -105,7 +111,7 @@ TryAgain:
         private static async Task RunViaPipelines()
         {
             using (var client = await SimplPipelineClient.ConnectAsync(
-                new IPEndPoint(IPAddress.Loopback, 5000)))
+                new IPEndPoint(IPAddress.Loopback, port)))
             {
                 await Console.Out.WriteLineAsync(
                     "Client connected; type 'q' to quit, anything else to send");
@@ -135,7 +141,7 @@ TryAgain:
             using (var client = new SimplSocketClient(() => new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
             { NoDelay = true }))
             {
-                client.Connect(new IPEndPoint(IPAddress.Loopback, 5000));
+                client.Connect(new IPEndPoint(IPAddress.Loopback, port));
                 await Console.Out.WriteLineAsync(
                     "Client connected; type 'q' to quit, anything else to send");
                 await Console.Out.WriteLineAsync(

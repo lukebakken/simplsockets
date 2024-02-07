@@ -152,49 +152,58 @@ namespace SimplPipelines
             return true;
         }
 
-
         protected async Task StartReceiveLoopAsync(CancellationToken cancellationToken = default)
         {
-            var reader = _pipe?.Input ?? throw new ObjectDisposedException(ToString());
-            try
+            using (var timeoutTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1)))
+            using (var lts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTokenSource.Token))
             {
-                await OnStartReceiveLoopAsync();
-                bool makingProgress = false;
-                while (!cancellationToken.IsCancellationRequested)
+                PipeReader reader = _pipe?.Input ?? throw new ObjectDisposedException(ToString());
+                try
                 {
-                    if (!(makingProgress && reader.TryRead(out var readResult)))
-                        readResult = await reader.ReadAsync(cancellationToken);
-                    if (readResult.IsCanceled) break;
-
-                    var buffer = readResult.Buffer;
-
-                    // handle as many frames from the data as we can
-                    // (note: an alternative strategy is handle one frame
-                    // and release via AdvanceTo as soon as possible)
-                    makingProgress = false;
-                    while (TryParseFrame(ref buffer, out var payload, out var messageId))
+                    await OnStartReceiveLoopAsync();
+                    bool makingProgress = false;
+                    while (!cancellationToken.IsCancellationRequested)
                     {
-                        makingProgress = true;
-                        await OnReceiveAsync(payload, messageId);
+                        if (!(makingProgress && reader.TryRead(out ReadResult readResult)))
+                        {
+                            readResult = await reader.ReadAsync(lts.Token);
+                        }
+
+                        if (readResult.IsCanceled)
+                        {
+                            break;
+                        }
+
+                        ReadOnlySequence<byte> buffer = readResult.Buffer;
+
+                        // handle as many frames from the data as we can
+                        // (note: an alternative strategy is handle one frame
+                        // and release via AdvanceTo as soon as possible)
+                        makingProgress = false;
+                        while (TryParseFrame(ref buffer, out var payload, out var messageId))
+                        {
+                            makingProgress = true;
+                            await OnReceiveAsync(payload, messageId);
+                        }
+
+                        // record that we comsumed up to the (now updated) buffer.Start,
+                        // and tried to look at everything - hence buffer.End
+                        reader.AdvanceTo(buffer.Start, buffer.End);
+
+                        // exit the loop electively, or because we've consumed everything
+                        // that we can usefully consume
+                        if (!makingProgress && readResult.IsCompleted) break;
                     }
-
-                    // record that we comsumed up to the (now updated) buffer.Start,
-                    // and tried to look at everything - hence buffer.End
-                    reader.AdvanceTo(buffer.Start, buffer.End);
-
-                    // exit the loop electively, or because we've consumed everything
-                    // that we can usefully consume
-                    if (!makingProgress && readResult.IsCompleted) break;
+                    try { reader.Complete(); } catch { }
                 }
-                try { reader.Complete(); } catch { }
-            }
-            catch (Exception ex)
-            {
-                try { reader.Complete(ex); } catch { }
-            }
-            finally
-            {
-                try { await OnEndReceiveLoopAsync(); } catch { }
+                catch (Exception ex)
+                {
+                    try { reader.Complete(ex); } catch { }
+                }
+                finally
+                {
+                    try { await OnEndReceiveLoopAsync(); } catch { }
+                }
             }
         }
 

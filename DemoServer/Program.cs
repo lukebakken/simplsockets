@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Pipelines.Sockets.Unofficial;
+using SimplPipelines;
+using SimplSockets;
+using System;
 using System.Buffers;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using Pipelines.Sockets.Unofficial;
-using SimplPipelines;
-using SimplSockets;
 
 namespace DemoServer
 {
@@ -15,6 +15,8 @@ namespace DemoServer
     {
         private static Task Main(string[] args)
         {
+            return RunViaPipelines();
+            /*
             string option;
             TryAgain:
             if (args == null || args.Length == 0)
@@ -35,6 +37,7 @@ namespace DemoServer
                 default: goto TryAgain;
                     
             }
+            */
         }
 
         private static async Task RunViaPipelines()

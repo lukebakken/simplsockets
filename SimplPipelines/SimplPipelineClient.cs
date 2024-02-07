@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Pipelines.Sockets.Unofficial;
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO.Pipelines;
 using System.Net;
 using System.Threading.Tasks;
-using Pipelines.Sockets.Unofficial;
 
 namespace SimplPipelines
 {

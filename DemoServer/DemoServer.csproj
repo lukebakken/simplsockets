@@ -10,7 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SimplPipelines\SimplPipelines.csproj" />
     <ProjectReference Include="..\SimplSockets\SimplSockets.csproj" />
-    <PackageReference Include="Pipelines.Sockets.Unofficial" Version="2.2.2" />
+    <PackageReference Include="Pipelines.Sockets.Unofficial" Version="2.2.8" />
   </ItemGroup>
 
 </Project>
